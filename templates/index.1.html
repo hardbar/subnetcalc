@@ -1,0 +1,52 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Subnet Calculator
+{% endblock %}
+
+{% block main %}
+    <header>
+        <div class="container">
+            <div class="bg-1">
+                <h3>There's no place like 127.0.0.1</h3>
+            </div>
+        </div>
+    </header>
+            <form class="form-horizontal">
+                <div class="form-group">
+                    <label for="inputlg">Enter an IP/prefix in the box below:</label>
+                    <input class="form-control input-lg" id="inputlg" type="text">
+                </div>
+            </form>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Type</th>
+                <th>IPv4</th>
+                <th>Binary</th>
+            </tr>
+        </thead>
+        <tfoot>
+            <tr>
+                <td></td>
+                <td></td>
+            </tr>
+        </tfoot>
+        <tbody>
+                    {% for i in result %}
+                <tr>
+                    <td>{{i["symbol"]}}</td>
+                    <td>{{i["name"]}}</td>
+                    <td>{{i["numShares"]}}</td>
+                    <td>${{"%0.2f" % i["price"]|float}}</td>
+                    <td>${{"%0.2f" % i["total"]|float}}</td>
+                </tr>
+                    {% endfor %} 
+            <tr>
+                <td></td>
+                <td></td>
+            </tr>
+        </tbody>
+    </table>
+{% endblock %}

@@ -1,0 +1,30 @@
+.container
+{
+    /* center contents */
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+}
+
+.center {
+    text-align: center;
+}
+
+
+main img
+{
+    /* constrain images on small screens */
+    max-width: 100%;
+}
+
+main td
+{
+    /* left-align tables' cells */
+    text-align: left;
+}
+
+main tfoot
+{
+    /* boldface tables' footers */
+    font-weight: bold;
+}

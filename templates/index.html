@@ -1,0 +1,76 @@
+{% extends "layout.html" %}
+
+
+{% block body %}
+
+<!-- Header -->
+<header class="w3-container w3-theme w3-padding" id="myHeader">
+  <div class="w3-center">
+  <p><br></p><h4><strong>"There's no place like 127.0.0.1"</strong></h4>
+  <h1 class="w3-xxxlarge">Subnet Calculator</h1><p></p>
+  </div>
+</header>
+
+<!-- Form -->
+<div class="w3-container w3-light-blue w3-padding" style="min-height:500px">
+    <p><br></p>
+    <div class="w3-row-padding w3-half">
+        <form action="{{ url_for('index') }}" method="POST">  
+        <p><input class="w3-input" style="font-size:48px" autocomplete="off" name="userIP" placeholder="Enter ip address/mask here" type="text"></p>
+        </form>
+    </div>
+    <div class="w3-half">   
+        <button class="w3-btn w3-border w3-blue-grey w3-block w3-ripple w3-xxxlarge">Generate Table</button>
+    </div>
+    <br>
+    <div>
+    {% if error %}
+        <p class="error w3-container w3-padding w3-red"><strong>Error:</strong> {{ error }}
+    {% endif %}
+    </div>
+  <!-- Table builder -->
+  <div class="w3-container w3-padding">  
+    <table class="w3-table-all">
+  <!--     <thead>
+       <tr class="w3-blue">
+            <th>Description</th>
+            <th>IP Details</th>
+            <th>Binary Equivalent</th>
+        </tr>
+      </thead> -->
+        <tbody>
+            {% for i in ipList %}
+                <tr class="w3-hover-blue">
+                <td>{{ i[0] }}</td>
+                <td>{{ i[1] }}</td>
+                <td>{{ i[2] }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+        <p><br></p>
+      </table>
+    </div>
+</div>
+
+
+
+<!-- *****RESET***** -->
+<div class="w3-container w3-theme w3-padding w3-center" style="min-height:150px">
+    <form action="{{ url_for('index') }}" method="GET">
+        <h3>To reset the table, click below:</h3>
+        <button class="w3-btn w3-border w3-xlarge" style="width:75%"><strong>Reset</strong></button>
+    </form>
+</div>
+
+<p></p>
+
+
+<!-- Footer -->
+<footer class="w3-container w3-blue-grey w3-leftbar">
+    <p class="w3-xlarge w3-serif"><i>"Make it as simple as possible, but not simpler."</i></p>
+    <p>Albert Einstein</p>
+    <h4 class="w3-right">&copy Harding IT Solutions</h4>
+    
+</footer>
+
+{% endblock %}
