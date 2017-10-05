@@ -18,11 +18,18 @@ FirstHost:   192.168.0.1           11000000.10101000.00000000 .00000001
 LastHost:    192.168.0.254         11000000.10101000.00000000 .11111110
 AvailHosts:  254
 
+Flask App Variable/s:
+export FLASK_APP=subnetcalc_app.py
+export FLASK_DEBUG=1
+
 @version: 0.1  -01/09/2017 finished coding the basic functionality - cmd line only
-@version: 0.2  -04/09/2017 added flask functionality in order to run the app in a browser
+@version: 0.2  -04/09/2017 added flask to build tool as web app
 @version: 0.3  -11/09/2017 completed most of index.html, added some form validation 
 @version: 0.4  -13/09/2017 completed layout and design, fixed reset button issue, fixed error handling issues
-
+@version: 0.5  -05/19/2017 fixed bug-id001 :IndexError occurs when user input is only host IP (no mask or /), added if statement to match only if not a host/32 where errors occured
+               -05/19/2017 fixed bug-id002 :only first octet of the IP address's binary was displayed, changed "ipOnly[0].split to ipOnly.split" to resolve the issue
+               -05/10/2017 added autofocus to input class in index.html
+               
 TODO
 perhaps for version 1.0:
 --add whois lookup functionality - see dnspython
@@ -39,13 +46,13 @@ import ipaddress
 from flask import Flask, flash, redirect, render_template, request, session, url_for
 from flask_session import Session
 from tempfile import gettempdir
-from wtforms.validators import ValidationError
+
 
 ##
 # VERSION INFO
 ##
-version = "v0.4"
-buildDate = "13/09/2017"
+version = "v0.5"
+buildDate = "05/10/2017"
 
 ##
 # FLASK CONFIGS
@@ -124,11 +131,14 @@ def userInput(ip):
         Keyword arguments:
         ip -- ip address or "Q" to quit, entered by user
     """
+    print("This is the userInput function start")
     while True:
         try:
             if ipaddress.ip_interface(ip) != ValueError:
+                print("\nNo value error\n\n")
                 return ip
         except ValueError:
+            print("\nValue error here\n\n")
             return ValueError
             
 
@@ -139,8 +149,8 @@ def ipDetail(ip):
         Keyword arguments:
         ip -- ip address entered by user
     """
-    ipDict = {}
-    ipList = []
+    ipDict = {}         # used to create the dictionary objects that are placed in the tuples in the list
+    ipList = []         # the list of tuples containing the ip info to return
     ipInt = ipaddress.ip_interface(ip)    # object to extract 
     ipNet = ipInt.network    # object to extract subnet host is on and to obtain the netmask
     ipNetwork = ipaddress.ip_network(ip, strict=False)    # object to extract 
@@ -148,7 +158,7 @@ def ipDetail(ip):
 # print the given ip address and its binary equivalent
     ipTmp = ip.split('/')
     ipOnly = ipTmp[0]
-    ipBinary = '.' .join(format(int(i), "08b") for i in ipOnly[0].split("."))
+    ipBinary = '.' .join(format(int(i), "08b") for i in ipOnly.split("."))
     ipDict[ipOnly] = ipBinary
     ipList.append(("Address:", ipOnly, ipBinary))
 
@@ -172,30 +182,34 @@ def ipDetail(ip):
     ipList.append(("Network:", ipnetOnly, subnetBinary))
 
 # print out the broadcast and its binary equivalent
-    bcastBinary = '.' .join(format(int(i), "08b") for i in (str(ipInt.network.broadcast_address)).split("."))
-    bcastAddress = str(ipInt.network.broadcast_address)
-    ipDict[bcastAddress] = bcastBinary
-    ipList.append(("Broadcast:", bcastAddress, bcastBinary))
+    if str(ipInt.netmask) != "255.255.255.255":     # this helps the handling of host only addresses, and avoids indexing issues
+        bcastBinary = '.' .join(format(int(i), "08b") for i in (str(ipInt.network.broadcast_address)).split("."))
+        bcastAddress = str(ipInt.network.broadcast_address)
+        ipDict[bcastAddress] = bcastBinary
+        ipList.append(("Broadcast:", bcastAddress, bcastBinary))
 
 # print out the first host and its binary equivalent
-    firstTmp = ipNetwork[1]
-    firstHost = str(firstTmp)
-    firstHostBinary = '.' .join(format(int(i), "08b") for i in str(firstTmp).split("."))
-    ipDict[firstHost] = firstHostBinary
-    ipList.append(("FirstHost:", firstHost, firstHostBinary))
+    if str(ipInt.netmask) != "255.255.255.255":     # this helps the handling of host only addresses, and avoids indexing issues
+        firstTmp = ipNetwork[1]
+        firstHost = str(firstTmp)
+        firstHostBinary = '.' .join(format(int(i), "08b") for i in str(firstTmp).split("."))
+        ipDict[firstHost] = firstHostBinary
+        ipList.append(("FirstHost:", firstHost, firstHostBinary))
 
 # print out the last host and its binary equivalent
-    lastTmp = ipNetwork[-2]
-    lastHost = str(lastTmp)
-    lastHostBinary = '.' .join(format(int(i), "08b") for i in str(lastTmp).split("."))
-    ipDict[lastHost] = lastHostBinary
-    ipList.append(("LastHost:", lastHost, lastHostBinary))
+    if str(ipInt.netmask) != "255.255.255.255":     # this helps the handling of host only addresses, and avoids indexing issues
+        lastTmp = ipNetwork[-2]
+        lastHost = str(lastTmp)
+        lastHostBinary = '.' .join(format(int(i), "08b") for i in str(lastTmp).split("."))
+        ipDict[lastHost] = lastHostBinary
+        ipList.append(("LastHost:", lastHost, lastHostBinary))
 
 # print out the number of hosts on the subnet
-    availTmp = int(lastTmp) - int(firstTmp)
-    availHosts = str(availTmp)
-    ipDict["AvailHosts"] = availHosts
-    ipList.append(("AvailHosts", availHosts))
+    if str(ipInt.netmask) != "255.255.255.255":     # this helps the handling of host only addresses, and avoids indexing issues
+        availTmp = int(lastTmp) - int(firstTmp)
+        availHosts = str(availTmp)
+        ipDict["AvailHosts"] = availHosts
+        ipList.append(("AvailHosts", availHosts))
 
 # return the list of tuples
     return ipList
